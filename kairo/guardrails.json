@@ -1,0 +1,120 @@
+{
+  "name": "SoveriLearn Educational Guardrails",
+  "version": "1.0.0",
+  "description": "Kairo-defined expertise steers to prevent jailbreaks and ensure pedagogical compliance",
+  "rules": [
+    {
+      "id": "no_direct_answers",
+      "name": "Require Step-by-Step Reasoning",
+      "severity": "high",
+      "pattern": "direct_answer_without_reasoning",
+      "description": "Blocks responses that provide direct answers without showing the reasoning process",
+      "check": {
+        "type": "regex",
+        "pattern": "^(here'?s? (the )?(answer|solution|result))|^(the answer is)|^(it'?s? (simply|just))",
+        "flags": "i"
+      },
+      "action": "block",
+      "message": "Educational responses must include step-by-step reasoning. Please explain your thought process."
+    },
+    {
+      "id": "jailbreak_detection",
+      "name": "Jailbreak Attempt Detection",
+      "severity": "critical",
+      "pattern": "jailbreak_attempt",
+      "description": "Detects attempts to bypass educational guidelines",
+      "checks": [
+        {
+          "type": "keyword",
+          "keywords": [
+            "ignore previous instructions",
+            "forget your instructions",
+            "act as if",
+            "pretend to be",
+            "you are now",
+            "system override",
+            "developer mode",
+            "jailbreak"
+          ],
+          "case_sensitive": false
+        }
+      ],
+      "action": "block",
+      "message": "This request attempts to bypass educational guidelines. Please ask a legitimate educational question."
+    },
+    {
+      "id": "require_educational_context",
+      "name": "Maintain Educational Context",
+      "severity": "medium",
+      "pattern": "off_topic",
+      "description": "Ensures responses stay within educational boundaries",
+      "check": {
+        "type": "sentiment_analysis",
+        "threshold": 0.3
+      },
+      "action": "warn",
+      "message": "Please keep questions focused on educational topics."
+    },
+    {
+      "id": "prevent_cheating",
+      "name": "Prevent Academic Dishonesty",
+      "severity": "high",
+      "pattern": "cheating_attempt",
+      "description": "Detects requests that facilitate academic dishonesty",
+      "checks": [
+        {
+          "type": "keyword",
+          "keywords": [
+            "do my homework",
+            "write my essay",
+            "take my test",
+            "complete my assignment",
+            "solve this for me without explanation"
+          ],
+          "case_sensitive": false
+        }
+      ],
+      "action": "block",
+      "message": "I'm here to help you learn, not to complete assignments for you. Let's work through this together step-by-step."
+    },
+    {
+      "id": "pedagogical_quality",
+      "name": "Pedagogical Quality Check",
+      "severity": "medium",
+      "pattern": "low_quality_response",
+      "description": "Ensures responses meet minimum pedagogical standards",
+      "check": {
+        "type": "length",
+        "min_length": 50,
+        "max_length": 5000
+      },
+      "action": "warn",
+      "message": "Response should provide adequate educational value."
+    },
+    {
+      "id": "factual_accuracy",
+      "name": "Factual Accuracy Verification",
+      "severity": "high",
+      "pattern": "unverified_fact",
+      "description": "Requires facts to be verified against SEDA TruthOracle",
+      "check": {
+        "type": "external",
+        "service": "seda_verification"
+      },
+      "action": "block",
+      "message": "This fact must be verified against educational records before sharing."
+    }
+  ],
+  "steering": {
+    "expertise_mode": true,
+    "pedagogical_focus": true,
+    "socratic_method": true,
+    "adaptive_difficulty": true
+  },
+  "monitoring": {
+    "real_time": true,
+    "session_tracking": true,
+    "violation_logging": true,
+    "audit_trail": true
+  }
+}

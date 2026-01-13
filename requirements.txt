@@ -1,0 +1,25 @@
+# Core dependencies
+fastapi==0.104.1
+uvicorn==0.24.0
+pydantic==2.5.0
+httpx==0.25.2
+websockets==12.0
+
+# SEDA integration
+web3==6.11.3
+eth-account==0.9.0
+
+# Kairo / Security
+pydantic-settings==2.1.0
+python-dotenv==1.0.0
+
+# MCP Server
+mcp==0.1.0
+
+# Overshoot AI
+openai==1.3.7
+anthropic==0.7.7
+
+# Utilities
+python-multipart==0.0.6
+aiofiles==23.2.1

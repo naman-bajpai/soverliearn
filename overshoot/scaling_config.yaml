@@ -1,0 +1,156 @@
+# Overshoot AI Scaling Configuration
+# Handles thousand-user spikes with distributed GPU clusters
+
+scaling:
+  # Auto-scaling configuration
+  auto_scale:
+    enabled: true
+    min_instances: 2
+    max_instances: 100
+    target_cpu_utilization: 70
+    target_memory_utilization: 80
+    scale_up_cooldown: 30s
+    scale_down_cooldown: 300s
+
+  # Load balancing
+  load_balancer:
+    strategy: "round_robin"  # round_robin, least_connections, weighted
+    health_check_interval: 10s
+    health_check_timeout: 5s
+
+  # Request queuing
+  queue:
+    enabled: true
+    max_queue_size: 1000
+    timeout: 60s
+    priority_levels: 3  # high, medium, low
+
+# Inference configuration
+inference:
+  # Model settings
+  model:
+    default: "llama-3-70b"
+    fallback: "llama-3-8b"  # Fallback for high load
+    cache_enabled: true
+    cache_ttl: 3600  # seconds
+
+  # Test-Time Scaling (think longer for harder questions)
+  test_time_scaling:
+    enabled: true
+    base_temperature: 0.7
+    base_max_tokens: 512
+    
+    # Difficulty-based scaling
+    difficulty_levels:
+      easy:
+        temperature: 0.7
+        max_tokens: 256
+        num_passes: 1
+        timeout: 10s
+      
+      medium:
+        temperature: 0.8
+        max_tokens: 512
+        num_passes: 2
+        timeout: 20s
+      
+      hard:
+        temperature: 0.9
+        max_tokens: 1024
+        num_passes: 3
+        timeout: 40s
+      
+      expert:
+        temperature: 1.0
+        max_tokens: 2048
+        num_passes: 5
+        timeout: 60s
+
+  # Batch processing
+  batching:
+    enabled: true
+    batch_size: 8
+    batch_timeout: 100ms
+    max_batch_size: 32
+
+  # Streaming
+  streaming:
+    enabled: true
+    chunk_size: 50  # tokens per chunk
+    buffer_size: 10
+
+# Cluster configuration
+clusters:
+  # Primary cluster (high-performance GPUs)
+  primary:
+    region: "us-east-1"
+    instance_type: "gpu.4xlarge"
+    gpu_type: "A100"
+    gpu_count: 4
+    instances: 10
+
+  # Secondary cluster (cost-optimized)
+  secondary:
+    region: "us-west-2"
+    instance_type: "gpu.2xlarge"
+    gpu_type: "V100"
+    gpu_count: 2
+    instances: 5
+
+  # Edge cluster (low latency)
+  edge:
+    region: "eu-west-1"
+    instance_type: "gpu.1xlarge"
+    gpu_type: "T4"
+    gpu_count: 1
+    instances: 3
+
+# Monitoring and observability
+monitoring:
+  metrics:
+    - request_rate
+    - latency_p50
+    - latency_p95
+    - latency_p99
+    - error_rate
+    - gpu_utilization
+    - queue_depth
+  
+  alerts:
+    - name: "high_latency"
+      condition: "latency_p95 > 5s"
+      severity: "warning"
+    
+    - name: "high_error_rate"
+      condition: "error_rate > 0.05"
+      severity: "critical"
+    
+    - name: "queue_overflow"
+      condition: "queue_depth > 800"
+      severity: "warning"
+
+# Rate limiting
+rate_limiting:
+  enabled: true
+  per_user:
+    requests_per_minute: 60
+    requests_per_hour: 1000
+    tokens_per_minute: 10000
+  
+  per_session:
+    requests_per_minute: 30
+    max_concurrent_requests: 5
+
+# Cost optimization
+cost_optimization:
+  spot_instances:
+    enabled: true
+    max_spot_percentage: 50
+  
+  model_caching:
+    enabled: true
+    cache_warmup: true
+  
+  request_deduplication:
+    enabled: true
+    dedup_window: 60s
